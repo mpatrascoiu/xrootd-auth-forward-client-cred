@@ -24,7 +24,7 @@ AuthForwardClientCred::AuthForwardClientCred(XrdSysLogger *logger,
                                const char   *param)
   : mLogger(logger),
     mConfig(config),
-    mParam(param)    {}
+    mParam(param)    { mSssRegistry = 0; }
 
 AuthForwardClientCred::~AuthForwardClientCred() {}
 
