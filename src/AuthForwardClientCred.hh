@@ -41,6 +41,7 @@ private:
   //                           The ID is generated from the sec entity tident field.
   const char *generatePssIDfromEntity(const XrdSecEntity *entity);
 
+  XrdSecsssID *mSssRegistry;
   XrdSysLogger *mLogger;
   const char *mConfig;
   const char *mParam;

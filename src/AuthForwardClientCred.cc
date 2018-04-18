@@ -59,13 +59,14 @@ XrdSecsssID *AuthForwardClientCred::getsssRegistry()
   char *dID;
   int   dIDLen;
   XrdSecsssID::authType aType;
-  XrdSecsssID *sssIdRegistry;
 
-  sssIdRegistry = XrdSecsssID::getObj(aType, &dID, dIDLen);
-  if (!sssIdRegistry) { sssIdRegistry = new XrdSecsssID(XrdSecsssID::idDynamic); }
+  if (mSssRegistry) return mSssRegistry;
+
+  mSssRegistry = XrdSecsssID::getObj(aType, &dID, dIDLen);
+  if (!mSssRegistry) { mSssRegistry = new XrdSecsssID(XrdSecsssID::idDynamic); }
   free(dID);
 
-  return sssIdRegistry;
+  return mSssRegistry;
 }
 
 const char *AuthForwardClientCred::generatePssIDfromEntity(const XrdSecEntity *entity)
