@@ -35,6 +35,7 @@ XrdAccPrivs AuthForwardClientCred::Access(const XrdSecEntity    *entity,
 {
   const char   *theID = 0;
   XrdSecsssID  *sssIdRegistry;
+  XrdSecEntity *FwdClientEntity;
 
   /* Get SSS Registry handle */
   sssIdRegistry = getsssRegistry();
@@ -45,7 +46,8 @@ XrdAccPrivs AuthForwardClientCred::Access(const XrdSecEntity    *entity,
     TkEroute.Say("[AuthForwardClientCred] Registering sec entity: id=", theID,
                  " name=", entity->name);
 
-    sssIdRegistry->Register(theID, (XrdSecEntity *) &entity, 1);
+    FwdClientEntity = copySecEntity(entity, "sss");
+    sssIdRegistry->Register(theID, FwdClientEntity, 1);
 
     /* Enforce SSS security */
     setenv("XrdSecPROTOCOL", "sss", 1);
@@ -83,6 +85,19 @@ const char *AuthForwardClientCred::generatePssIDfromEntity(const XrdSecEntity *e
   }
 
   return id ? strdup(id)  : id;
+}
+
+XrdSecEntity *AuthForwardClientCred::copySecEntity(const XrdSecEntity *entity,
+                                                   const char *pName)
+{
+  XrdSecEntity *copyEntity = new XrdSecEntity(pName);
+
+  copyEntity->name   = entity->name;
+  copyEntity->grps   = entity->grps;
+  copyEntity->host   = entity->host;
+  copyEntity->tident = entity->tident;
+
+  return copyEntity;
 }
 
 extern "C" XrdAccAuthorize *XrdAccAuthorizeObject(XrdSysLogger *lp,

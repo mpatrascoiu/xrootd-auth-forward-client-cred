@@ -36,15 +36,17 @@ public:
 private:
   // getsssRegistry() attempts to retrieve an existing SSS Registry
   //                  or creates it otherwise
-  XrdSecsssID *getsssRegistry();
+  XrdSecsssID  *getsssRegistry();
   // generatePssIDfromEntity() creates the same user ID the PSS component will use.
   //                           The ID is generated from the sec entity tident field.
-  const char *generatePssIDfromEntity(const XrdSecEntity *entity);
+  const char   *generatePssIDfromEntity(const XrdSecEntity *entity);
+  XrdSecEntity *copySecEntity(const XrdSecEntity *entity,
+                              const char *pName);
 
-  XrdSecsssID *mSssRegistry;
+  XrdSecsssID  *mSssRegistry;
   XrdSysLogger *mLogger;
-  const char *mConfig;
-  const char *mParam;
+  const char   *mConfig;
+  const char   *mParam;
 
 };
 
