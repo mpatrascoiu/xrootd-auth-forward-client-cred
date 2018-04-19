@@ -62,5 +62,5 @@ then the credentials saved in the plugin would not be accessible anymore.
 
 2. The Authorization plugin is making a strong assumption that the 
 XrdSecEntity::tident has the value of the XrdLink::ID. 
-Although true for the XrootD protocol, is not always the case 
+Although true for the XRootD protocol, this is not always the case 
 (the XrdHttp protocol, for example).
