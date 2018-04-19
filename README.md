@@ -64,3 +64,10 @@ then the credentials saved in the plugin would not be accessible anymore.
 XrdSecEntity::tident has the value of the XrdLink::ID. 
 Although true for the XRootD protocol, this is not always the case 
 (the XrdHttp protocol, for example).
+
+
+Dependencies
+=============
+
+This plugin requires the XrdSecsssID.hh header from the XrdSecsss module.  
+One way to get this header is to export it from XRootD project.
