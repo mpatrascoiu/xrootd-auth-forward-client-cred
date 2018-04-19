@@ -39,7 +39,7 @@ private:
   XrdSecsssID  *getsssRegistry();
   // generatePssIDfromEntity() creates the same user ID the PSS component will use.
   //                           The ID is generated from the sec entity tident field.
-  const char   *generatePssIDfromEntity(const XrdSecEntity *entity);
+  const char   *generatePssIDfromTraceIdent(const char *tident);
   XrdSecEntity *copySecEntity(const XrdSecEntity *entity,
                               const char *pName);
 

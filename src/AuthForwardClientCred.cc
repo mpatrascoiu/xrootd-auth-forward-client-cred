@@ -42,7 +42,7 @@ XrdAccPrivs AuthForwardClientCred::Access(const XrdSecEntity    *entity,
 
 // Register the sec entity into the registry only if we have a valid ID
 //
-  if (theID = generatePssIDfromEntity(entity)) {
+  if (theID = generatePssIDfromTraceIdent(entity->tident)) {
     TkEroute.Say("[AuthForwardClientCred] Registering sec entity: id=", theID,
                  " name=", entity->name);
 
@@ -71,15 +71,14 @@ XrdSecsssID *AuthForwardClientCred::getsssRegistry()
   return mSssRegistry;
 }
 
-const char *AuthForwardClientCred::generatePssIDfromEntity(const XrdSecEntity *entity)
+const char *AuthForwardClientCred::generatePssIDfromTraceIdent(const char *tident)
 {
-  const char *ident = entity->tident;
   char *id = 0, *idP, idBuff[8];
 
-  if (ident) {
-    if (*ident == '=') id = (char *) ident + 1;
-    else if (ident = index(ident, ':')) {
-      strncpy(idBuff, ident + 1, 7); idBuff[7] = 0;
+  if (tident) {
+    if (*tident == '=') id = (char *) tident + 1;
+    else if (tident = index(tident, ':')) {
+      strncpy(idBuff, tident + 1, 7); idBuff[7] = 0;
       if (idP = index(idBuff, '@')) { *idP = 0; id = idBuff; }
     }
   }
