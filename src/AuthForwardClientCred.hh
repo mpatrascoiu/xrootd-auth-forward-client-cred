@@ -4,13 +4,12 @@
 #include <XrdAcc/XrdAccAuthorize.hh>
 #include <XrdAcc/XrdAccPrivs.hh>
 #include <XrdSec/XrdSecEntity.hh>
+#include <XrdSecsss/XrdSecsssID.hh>
 #include <XrdSys/XrdSysLogger.hh>
 #include <XrdVersion.hh>
 #include <stdio.h>
 #include <sys/types.h>
 #include <string>
-#include "../../xrootd/src/XrdSecsss/XrdSecsssID.hh"
-
 
 class AuthForwardClientCred : public XrdAccAuthorize
 {

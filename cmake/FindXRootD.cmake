@@ -10,7 +10,6 @@
 
 FIND_PATH(XROOTD_INCLUDE_DIR XrdVersion.hh
         HINTS
-        /home/mipatras/workspace/xrootd/src/
         ${XROOTD_DIR}
         $ENV{XROOTD_DIR}
         /usr
@@ -39,7 +38,7 @@ FIND_LIBRARY(XROOTD_UTILS XrdUtils
         PATH_SUFFIXES lib64
         )
 
-FIND_LIBRARY(XROOTD_SECSSS XrdSecsss-*
+FIND_LIBRARY(XROOTD_SECSSS XrdSecsss-4
         HINTS
         ${XROOTD_DIR}
         $ENV{XROOTD_DIR}

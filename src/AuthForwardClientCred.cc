@@ -4,7 +4,6 @@
 #include <XrdOuc/XrdOucString.hh>
 #include <XrdSys/XrdSysError.hh>
 #include "AuthForwardClientCred.hh"
-#include "/home/mipatras/workspace/xrootd/src/XrdSecsss/XrdSecsssID.hh"
 
 
 XrdSysError TkEroute(0, "AuthForwardClientCred");
