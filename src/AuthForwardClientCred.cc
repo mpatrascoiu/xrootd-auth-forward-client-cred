@@ -92,10 +92,10 @@ XrdSecEntity *AuthForwardClientCred::copySecEntity(const XrdSecEntity *entity,
 {
   XrdSecEntity *copyEntity = new XrdSecEntity(pName);
 
-  copyEntity->name   = entity->name;
-  copyEntity->grps   = entity->grps;
-  copyEntity->host   = entity->host;
-  copyEntity->tident = entity->tident;
+  copyEntity->name   = entity->name   ? strdup(entity->name)   : 0;
+  copyEntity->grps   = entity->grps   ? strdup(entity->grps)   : 0;
+  copyEntity->host   = entity->host   ? strdup(entity->host)   : 0;
+  copyEntity->tident = entity->tident ? strdup(entity->tident) : 0;
 
   return copyEntity;
 }
