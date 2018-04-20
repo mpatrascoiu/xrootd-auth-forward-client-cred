@@ -11,6 +11,10 @@
 #include <sys/types.h>
 #include <string>
 
+typedef XrdAccAuthorize *(*GetAuthObject_t)(XrdSysLogger *lp,
+                                            const char   *cfn,
+                                            const char   *parm);
+
 class AuthForwardClientCred : public XrdAccAuthorize
 {
 
@@ -33,6 +37,9 @@ public:
                    const Access_Operation open) { return 0; };
 
 private:
+  const char* getDelegateAuthLibPath(const char *config);
+  void loadDelegateAuthLib(const char *libPath);
+
   // getsssRegistry() attempts to retrieve an existing SSS Registry
   //                  or creates it otherwise
   XrdSecsssID  *getsssRegistry();
@@ -42,11 +49,14 @@ private:
   XrdSecEntity *copySecEntity(const XrdSecEntity *entity,
                               const char *pName);
 
+  void *mDelegateAuthLibHandle;
+  GetAuthObject_t mAuthObjHandler;
+  XrdAccAuthorize *mDelegateAuthLib;
+
   XrdSecsssID  *mSssRegistry;
   XrdSysLogger *mLogger;
   const char   *mConfig;
   const char   *mParam;
-
 };
 
 #endif  // __XROOTD_AUTH_FORWARD_CLIENT_CRED_HH__

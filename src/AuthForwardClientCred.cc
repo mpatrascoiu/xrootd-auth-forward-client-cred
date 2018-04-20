@@ -1,3 +1,5 @@
+#include <fcntl.h>
+#include <dlfcn.h>
 #include <XrdOuc/XrdOucTrace.hh>
 #include <XrdOuc/XrdOucEnv.hh>
 #include <XrdOuc/XrdOucStream.hh>
@@ -11,21 +13,104 @@ XrdOucTrace TkTrace(&TkEroute);
 
 XrdVERSIONINFO(XrdAccAuthorizeObject, AuthChangeName);
 
-/*
-extern XrdAccAuthorize *XrdAccDefaultAuthorizeObject(XrdSysLogger *lp,
-                                                     const char   *cfn,
-                                                     const char   *parm,
-                                                     XrdVersionInfo &vInfo);
-*/
 
 AuthForwardClientCred::AuthForwardClientCred(XrdSysLogger *logger,
                                const char   *config,
                                const char   *param)
   : mLogger(logger),
     mConfig(config),
-    mParam(param)    { mSssRegistry = 0; }
+    mParam(param),
+    mSssRegistry(0),
+    mDelegateAuthLibHandle(0),
+    mAuthObjHandler(0),
+    mDelegateAuthLib(0)
+{
+  const char *delegateAuthLibPath = getDelegateAuthLibPath(mConfig);
 
-AuthForwardClientCred::~AuthForwardClientCred() {}
+  if (delegateAuthLibPath) {
+    loadDelegateAuthLib(delegateAuthLibPath);
+  }
+}
+
+AuthForwardClientCred::~AuthForwardClientCred()
+{
+  delete mDelegateAuthLib;
+  mDelegateAuthLib = 0;
+
+  if (mDelegateAuthLibHandle) {
+    dlclose(mDelegateAuthLibHandle);
+    mDelegateAuthLibHandle = 0;
+  }
+}
+
+
+/******************************************************************************/
+/*                    A  u t h l i b   D e l e g a t i o n                    */
+/******************************************************************************/
+
+extern XrdAccAuthorize *XrdAccDefaultAuthorizeObject(XrdSysLogger *lp,
+                                                     const char   *cfn,
+                                                     const char   *parm,
+                                                     XrdVersionInfo &vInfo);
+
+const char *AuthForwardClientCred::getDelegateAuthLibPath(const char *config)
+{
+  XrdOucStream Config;
+  int cfgFd;
+  char *var, *libPath = 0;
+
+  if ((cfgFd = open(config, O_RDONLY, 0)) < 0) {
+    return 0;
+  }
+
+  Config.Attach(cfgFd);
+  while (var = Config.GetMyFirstWord()) {
+    if (strcmp(var, "authfwdclientcred.authlib") == 0) {
+      libPath = Config.GetWord();
+      break;
+    }
+  }
+
+  Config.Close();
+  return libPath;
+}
+
+void AuthForwardClientCred::loadDelegateAuthLib(const char *libPath)
+{
+  if (libPath && strcmp(libPath, "default") == 0) {
+    mDelegateAuthLib = XrdAccDefaultAuthorizeObject(mLogger, mConfig, mParam,
+                                    XrdVERSIONINFOVAR(XrdAccAuthorizeObject));
+    return;
+  }
+
+  mDelegateAuthLibHandle = dlopen(libPath, RTLD_NOW);
+
+  if (mDelegateAuthLibHandle == 0) {
+    TkEroute.Say("[AuthForwardClientCred]"
+                 " Could not open delegated auth lib: ", libPath);
+    return;
+  }
+
+  mAuthObjHandler = (GetAuthObject_t) dlsym(mDelegateAuthLibHandle,
+                                            "XrdAccAuthorizeObject");
+
+  if (mAuthObjHandler == 0)
+  {
+    TkEroute.Say("[AuthForwardClientCred] Could not find "
+                 "XrdAccAuthorizeObject symbol in: ", libPath);
+
+    dlclose(mDelegateAuthLibHandle);
+    mDelegateAuthLibHandle = 0;
+    return;
+  }
+
+  mDelegateAuthLib = (*mAuthObjHandler)(mLogger, mConfig, mParam);
+}
+
+
+/******************************************************************************/
+/*               A  u t h o r i z a t i o n   F u n c t i o n s               */
+/******************************************************************************/
 
 XrdAccPrivs AuthForwardClientCred::Access(const XrdSecEntity    *entity,
                                    const char            *path,
@@ -52,7 +137,8 @@ XrdAccPrivs AuthForwardClientCred::Access(const XrdSecEntity    *entity,
     setenv("XrdSecPROTOCOL", "sss", 1);
   }
 
-  return XrdAccPriv_All;
+  return mDelegateAuthLib ? mDelegateAuthLib->Access(entity, path, oper, env)
+                          : XrdAccPriv_All;
 }
 
 XrdSecsssID *AuthForwardClientCred::getsssRegistry()
