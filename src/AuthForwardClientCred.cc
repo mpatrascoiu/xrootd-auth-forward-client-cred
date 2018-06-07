@@ -120,6 +120,14 @@ XrdAccPrivs AuthForwardClientCred::Access(const XrdSecEntity    *entity,
   const char   *theID = 0;
   XrdSecsssID  *sssIdRegistry;
   XrdSecEntity *FwdClientEntity;
+  XrdAccPrivs accessLevel = XrdAccPriv_All;
+
+// Validate access with delegate library first
+//
+  if (mDelegateAuthLib) {
+    accessLevel = mDelegateAuthLib->Access(entity, path, oper, env);
+    if (accessLevel == XrdAccPriv_None) return accessLevel;
+  }
 
   /* Get SSS Registry handle */
   sssIdRegistry = getsssRegistry();
@@ -137,8 +145,7 @@ XrdAccPrivs AuthForwardClientCred::Access(const XrdSecEntity    *entity,
     setenv("XrdSecPROTOCOL", "sss", 1);
   }
 
-  return mDelegateAuthLib ? mDelegateAuthLib->Access(entity, path, oper, env)
-                          : XrdAccPriv_All;
+  return accessLevel;
 }
 
 XrdSecsssID *AuthForwardClientCred::getsssRegistry()
