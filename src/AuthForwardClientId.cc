@@ -5,16 +5,16 @@
 #include <XrdOuc/XrdOucStream.hh>
 #include <XrdOuc/XrdOucString.hh>
 #include <XrdSys/XrdSysError.hh>
-#include "AuthForwardClientCred.hh"
+#include "AuthForwardClientId.hh"
 
 
-XrdSysError TkEroute(0, "AuthForwardClientCred");
+XrdSysError TkEroute(0, "AuthForwardClientId");
 XrdOucTrace TkTrace(&TkEroute);
 
 XrdVERSIONINFO(XrdAccAuthorizeObject, AuthChangeName);
 
 
-AuthForwardClientCred::AuthForwardClientCred(XrdSysLogger *logger,
+AuthForwardClientId::AuthForwardClientId(XrdSysLogger *logger,
                                const char   *config,
                                const char   *param)
   : mLogger(logger),
@@ -32,7 +32,7 @@ AuthForwardClientCred::AuthForwardClientCred(XrdSysLogger *logger,
   }
 }
 
-AuthForwardClientCred::~AuthForwardClientCred()
+AuthForwardClientId::~AuthForwardClientId()
 {
   delete mDelegateAuthLib;
   mDelegateAuthLib = 0;
@@ -53,7 +53,7 @@ extern XrdAccAuthorize *XrdAccDefaultAuthorizeObject(XrdSysLogger *lp,
                                                      const char   *parm,
                                                      XrdVersionInfo &vInfo);
 
-const char *AuthForwardClientCred::getDelegateAuthLibPath(const char *config)
+const char *AuthForwardClientId::getDelegateAuthLibPath(const char *config)
 {
   XrdOucStream Config;
   int cfgFd;
@@ -65,7 +65,7 @@ const char *AuthForwardClientCred::getDelegateAuthLibPath(const char *config)
 
   Config.Attach(cfgFd);
   while (var = Config.GetMyFirstWord()) {
-    if (strcmp(var, "authfwdclientcred.authlib") == 0) {
+    if (strcmp(var, "authfwdclientid.authlib") == 0) {
       libPath = Config.GetWord();
       break;
     }
@@ -75,7 +75,7 @@ const char *AuthForwardClientCred::getDelegateAuthLibPath(const char *config)
   return libPath;
 }
 
-void AuthForwardClientCred::loadDelegateAuthLib(const char *libPath)
+void AuthForwardClientId::loadDelegateAuthLib(const char *libPath)
 {
   if (libPath && strcmp(libPath, "default") == 0) {
     mDelegateAuthLib = XrdAccDefaultAuthorizeObject(mLogger, mConfig, mParam,
@@ -86,8 +86,8 @@ void AuthForwardClientCred::loadDelegateAuthLib(const char *libPath)
   mDelegateAuthLibHandle = dlopen(libPath, RTLD_NOW);
 
   if (mDelegateAuthLibHandle == 0) {
-    TkEroute.Say("[AuthForwardClientCred]"
-                 " Could not open delegated auth lib: ", libPath);
+    TkEroute.Say("[AuthForwardClientId] "
+                 "Could not open delegated auth lib: ", libPath);
     return;
   }
 
@@ -96,7 +96,7 @@ void AuthForwardClientCred::loadDelegateAuthLib(const char *libPath)
 
   if (mAuthObjHandler == 0)
   {
-    TkEroute.Say("[AuthForwardClientCred] Could not find "
+    TkEroute.Say("[AuthForwardClientId] Could not find "
                  "XrdAccAuthorizeObject symbol in: ", libPath);
 
     dlclose(mDelegateAuthLibHandle);
@@ -112,7 +112,7 @@ void AuthForwardClientCred::loadDelegateAuthLib(const char *libPath)
 /*               A  u t h o r i z a t i o n   F u n c t i o n s               */
 /******************************************************************************/
 
-XrdAccPrivs AuthForwardClientCred::Access(const XrdSecEntity    *entity,
+XrdAccPrivs AuthForwardClientId::Access(const XrdSecEntity    *entity,
                                    const char            *path,
                                    const Access_Operation oper,
                                    XrdOucEnv             *env)
@@ -134,8 +134,8 @@ XrdAccPrivs AuthForwardClientCred::Access(const XrdSecEntity    *entity,
 
 // Register the sec entity into the registry only if we have a valid ID
 //
-  if (theID = generatePssIDfromTraceIdent(entity->tident)) {
-    TkEroute.Say("[AuthForwardClientCred] Registering sec entity: id=", theID,
+  if ((theID = generatePssIDfromTraceIdent(entity->tident))) {
+    TkEroute.Say("[AuthForwardClientId] Registering sec entity: id=", theID,
                  " name=", entity->name);
 
     FwdClientEntity = copySecEntity(entity, "sss");
@@ -148,7 +148,7 @@ XrdAccPrivs AuthForwardClientCred::Access(const XrdSecEntity    *entity,
   return accessLevel;
 }
 
-XrdSecsssID *AuthForwardClientCred::getsssRegistry()
+XrdSecsssID *AuthForwardClientId::getsssRegistry()
 {
   char *dID;
   int   dIDLen;
@@ -163,22 +163,22 @@ XrdSecsssID *AuthForwardClientCred::getsssRegistry()
   return mSssRegistry;
 }
 
-const char *AuthForwardClientCred::generatePssIDfromTraceIdent(const char *tident)
+const char *AuthForwardClientId::generatePssIDfromTraceIdent(const char *tident)
 {
   char *id = 0, *idP, idBuff[8];
 
   if (tident) {
     if (*tident == '=') id = (char *) tident + 1;
-    else if (tident = index(tident, ':')) {
+    else if ((tident = index(tident, ':'))) {
       strncpy(idBuff, tident + 1, 7); idBuff[7] = 0;
-      if (idP = index(idBuff, '@')) { *idP = 0; id = idBuff; }
+      if ((idP = index(idBuff, '@'))) { *idP = 0; id = idBuff; }
     }
   }
 
   return id ? strdup(id)  : id;
 }
 
-XrdSecEntity *AuthForwardClientCred::copySecEntity(const XrdSecEntity *entity,
+XrdSecEntity *AuthForwardClientId::copySecEntity(const XrdSecEntity *entity,
                                                    const char *pName)
 {
   XrdSecEntity *copyEntity = new XrdSecEntity(pName);
@@ -195,14 +195,14 @@ extern "C" XrdAccAuthorize *XrdAccAuthorizeObject(XrdSysLogger *lp,
                                                   const char   *cfn,
                                                   const char   *parm)
 {
-  TkEroute.SetPrefix("access_auth_forwardclientcred_");
+  TkEroute.SetPrefix("access_auth_forwardclientid_");
   TkEroute.logger(lp);
 
-  AuthForwardClientCred *authlib = new AuthForwardClientCred(lp, cfn, parm);
+  AuthForwardClientId *authlib = new AuthForwardClientId(lp, cfn, parm);
   XrdAccAuthorize* acc = dynamic_cast<XrdAccAuthorize*>(authlib);
 
   if (acc == 0) {
-    TkEroute.Say("Failed to create AuthForwardClientCred object!");
+    TkEroute.Say("Failed to create AuthForwardClientId object!");
   }
 
   return acc;

@@ -3,7 +3,7 @@
 #-------------------------------------------------------------------------------
 
 cmake_minimum_required( VERSION 2.6 )
-project( AuthForwardClientCred )
+project( AuthForwardClientId )
 
 set( CMAKE_INSTALL_PREFIX /usr )
 

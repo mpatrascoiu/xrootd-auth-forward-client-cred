@@ -1,5 +1,5 @@
-#ifndef __XROOTD_AUTH_FORWARD_CLIENT_CRED_HH__
-#define __XROOTD_AUTH_FORWARD_CLIENT_CRED_HH__
+#ifndef __XROOTD_AUTH_FORWARD_CLIENT_ID_HH__
+#define __XROOTD_AUTH_FORWARD_CLIENT_ID_HH__
 
 #include <XrdAcc/XrdAccAuthorize.hh>
 #include <XrdAcc/XrdAccPrivs.hh>
@@ -15,12 +15,12 @@ typedef XrdAccAuthorize *(*GetAuthObject_t)(XrdSysLogger *lp,
                                             const char   *cfn,
                                             const char   *parm);
 
-class AuthForwardClientCred : public XrdAccAuthorize
+class AuthForwardClientId : public XrdAccAuthorize
 {
 
 public:
-  AuthForwardClientCred(XrdSysLogger *logger, const char *config, const char *param);
-  virtual ~AuthForwardClientCred(void);
+  AuthForwardClientId(XrdSysLogger *logger, const char *config, const char *param);
+  virtual ~AuthForwardClientId(void);
 
   XrdAccPrivs Access(const XrdSecEntity    *entity,
                      const char            *path,
@@ -59,4 +59,4 @@ private:
   const char   *mParam;
 };
 
-#endif  // __XROOTD_AUTH_FORWARD_CLIENT_CRED_HH__
+#endif  // __XROOTD_AUTH_FORWARD_CLIENT_ID_HH__

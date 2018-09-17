@@ -52,4 +52,5 @@ CTestTestfile.cmake
 
 # CMake
 cmake-build-debug/
-cmake-build-release/git remote add origin https://github.com/mpatrascoiu/xrootd-auth-foward-client-cred.git
+cmake-build-release/
+cmake-build-relwithdebinfo/
