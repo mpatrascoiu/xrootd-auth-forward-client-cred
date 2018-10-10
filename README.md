@@ -69,5 +69,4 @@ Although true for the XRootD protocol, this is not always the case
 Dependencies
 =============
 
-This plugin requires the XrdSecsssID.hh header from the XrdSecsss module.  
-One way to get this header is to export it from XRootD project.
+This plugin requires the XrdSecsssID.hh header from the XrdSecsss module.
