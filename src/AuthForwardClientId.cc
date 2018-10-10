@@ -140,9 +140,6 @@ XrdAccPrivs AuthForwardClientId::Access(const XrdSecEntity    *entity,
 
     FwdClientEntity = copySecEntity(entity, "sss");
     sssIdRegistry->Register(theID, FwdClientEntity, 1);
-
-    /* Enforce SSS security */
-    setenv("XrdSecPROTOCOL", "sss", 1);
   }
 
   return accessLevel;
