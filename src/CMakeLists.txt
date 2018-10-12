@@ -5,7 +5,8 @@ add_library(
   AuthForwardClientId.cc AuthForwardClientId.hh )
 
 include_directories(
-  ${XROOTD_INCLUDE_DIR} )
+  ${XROOTD_INCLUDE_DIR}
+  ${XROOTD_PRIVATE_INCLUDE_DIR} )
 
 add_definitions(
   -D_LARGEFILE_SOURCE
